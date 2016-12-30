@@ -1,5 +1,5 @@
 import pyglet.image
-from pybacon import pybacon_resources
+from freezegame import resources
 
 
 class Animation:
@@ -15,7 +15,7 @@ class Animation:
 
         seq = []
         for frame in self.frames:
-            img = pybacon_resources.images.__dict__[self.sprite.image_name].get_region(*frame)
+            img = resources.images.__dict__[self.sprite.image_name].get_region(*frame)
             seq.append(img)
 
         self.anim = pyglet.image.Animation.from_image_sequence(seq, self.timeout, loops)
@@ -36,15 +36,15 @@ class Animation:
         #            else:
         #                self.curFrame -= 1
         #                self.playing = False
-        #        self.sprite.setSprite(self.sprite.imageName, self.frames[self.curFrame], self.sprite.batch, self.sprite.group)
+        #        self.sprite.set_sprite(self.sprite.image_name, self.frames[self.curFrame], self.sprite.batch, self.sprite.group)
 
     def play(self):
         if self.playing is False or not self.loops:
-            self.sprite.setAnimationSprite(self.anim)
+            self.sprite.set_animation_sprite(self.anim)
             self.playing = True
 
-            # if self.sprite.imageRegion != self.frames[self.curFrame]:
-            #    self.sprite.setSprite(self.sprite.imageName, self.frames[self.curFrame], self.sprite.batch, self.sprite.group)
+            # if self.sprite.image_region != self.frames[self.curFrame]:
+            #    self.sprite.set_sprite(self.sprite.image_name, self.frames[self.curFrame], self.sprite.batch, self.sprite.group)
 
             # self.playing = True
             # if self.loops == False:

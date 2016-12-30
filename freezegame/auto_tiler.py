@@ -7,17 +7,17 @@ class AutoTiler:
         # Do base terrain/void transitions
         for i in range(0, tile_map.width):
             for j in range(0, tile_map.height):
-                if not tile_map.getTile([i, j]) is None and tile_map.getTile([i, j]).tileable:
+                if not tile_map.get_tile([i, j]) is None and tile_map.get_tile([i, j]).tileable:
                     tile_string = ''
-                    if not tile_map.validTile([i, j + 1]) or tile_map.getTile([i, j + 1]) is not None:
+                    if not tile_map.valid_tile([i, j + 1]) or tile_map.get_tile([i, j + 1]) is not None:
                         tile_string += 'U'
-                    if not tile_map.validTile([i, j - 1]) or tile_map.getTile([i, j - 1]) is not None:
+                    if not tile_map.valid_tile([i, j - 1]) or tile_map.get_tile([i, j - 1]) is not None:
                         tile_string += 'D'
-                    if not tile_map.validTile([i - 1, j]) or tile_map.getTile([i - 1, j]) is not None:
+                    if not tile_map.valid_tile([i - 1, j]) or tile_map.get_tile([i - 1, j]) is not None:
                         tile_string += 'L'
-                    if not tile_map.validTile([i + 1, j]) or tile_map.getTile([i + 1, j]) is not None:
+                    if not tile_map.valid_tile([i + 1, j]) or tile_map.get_tile([i + 1, j]) is not None:
                         tile_string += 'R'
                     image_region = tile_map.tiles[i][j].imageRegion
                     image_region[0] = self.autoMap[tile_string]
-                    tile_map.tiles[i][j].setSprite(tile_map.tiles[i][j].imageName, image_region,
+                    tile_map.tiles[i][j].set_sprite(tile_map.tiles[i][j].imageName, image_region,
                                                    batch=tile_map.tiles[i][j].batch, group=tile_map.tiles[i][j].group)
