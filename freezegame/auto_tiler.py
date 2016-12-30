@@ -17,7 +17,7 @@ class AutoTiler:
                         tile_string += 'L'
                     if not tile_map.valid_tile([i + 1, j]) or tile_map.get_tile([i + 1, j]) is not None:
                         tile_string += 'R'
-                    image_region = tile_map.tiles[i][j].imageRegion
+                    image_region = tile_map.tiles[i][j].image_region
                     image_region[0] = self.autoMap[tile_string]
-                    tile_map.tiles[i][j].set_sprite(tile_map.tiles[i][j].imageName, image_region,
+                    tile_map.tiles[i][j].set_sprite(tile_map.tiles[i][j].image_name, image_region,
                                                    batch=tile_map.tiles[i][j].batch, group=tile_map.tiles[i][j].group)

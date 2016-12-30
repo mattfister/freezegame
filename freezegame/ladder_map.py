@@ -19,5 +19,5 @@ class LadderMap(TileMap):
 
     def make_ladder(self, tileX, tileY):
         if self.validTile([tileX, tileY]):
-            ladder = Ladder(tileX * self.tileWidth, tileY * self.tileHeight, self.state)
+            ladder = Ladder(tileX * self.tile_width, tileY * self.tile_height, self.state)
             self.tiles[tileX][tileY] = ladder

@@ -69,9 +69,9 @@ class Sprite:
         self.animations = {}
         self.cur_animation = None
 
-        self.max_v_x = self.state.maxVX
-        self.max_v_y = self.state.maxVYPlus
-        self.max_v_y_minus = self.state.maxVYMinus
+        self.max_v_x = self.state.max_v_x
+        self.max_v_y = self.state.max_v_y_plus
+        self.max_v_y_minus = self.state.max_v_y_minus
 
         self.vision_cone_r = 32 * 20.0
 
@@ -206,7 +206,7 @@ class Sprite:
         gravity_step = 0.0;
 
         if self.frictional:
-            self.vx -= dt * self.vx * self.state.fric
+            self.vx -= dt * self.vx * self.state.friction
 
         self.clamp_v()
         old_y = self.y

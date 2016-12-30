@@ -5,8 +5,8 @@ from freezegame.auto_tiler import AutoTiler
 
 class TileMap:
     def __init__(self, tile_width, tile_height, width, height, state, tile_set, image_region, group):
-        self.tileWidth = tile_width
-        self.tileHeight = tile_height
+        self.tile_width = tile_width
+        self.tile_height = tile_height
 
         self.width = width
         self.height = height
@@ -30,7 +30,7 @@ class TileMap:
         for i in range(self.width):
             for j in range(self.height):
                 if i == 0 or i == self.width - 1 or j == 0 or j == self.height - 1:
-                    new_tile = Tile(i * self.tileWidth, j * self.tileHeight, [0, 0, self.tileWidth, self.tileHeight],
+                    new_tile = Tile(i * self.tile_width, j * self.tile_height, [0, 0, self.tile_width, self.tile_height],
                                     self.state, self.tileSet, self.imageRegion, self.batch, self.group)
                     new_tile.invincible = True
                     self.tiles[i][j] = new_tile
@@ -38,7 +38,7 @@ class TileMap:
     def fill(self):
         for i in range(self.width):
             for j in range(self.height):
-                new_tile = Tile(i * self.tileWidth, j * self.tileHeight, [0, 0, self.tileWidth, self.tileHeight],
+                new_tile = Tile(i * self.tile_width, j * self.tile_height, [0, 0, self.tile_width, self.tile_height],
                                 self.state, self.tileSet, self.imageRegion, self.batch, self.group)
                 self.tiles[i][j] = new_tile
 
@@ -64,8 +64,8 @@ class TileMap:
         pass
 
     def tile_coord_for_position(self, pos):
-        x = int(math.floor(float(pos[0]) / float(self.tileWidth)))
-        y = int(math.floor(float(pos[1]) / float(self.tileHeight)));
+        x = int(math.floor(float(pos[0]) / float(self.tile_width)))
+        y = int(math.floor(float(pos[1]) / float(self.tile_height)));
         return [x, y]
 
     def get_tile(self, coord):
@@ -123,8 +123,8 @@ class TileMap:
     def make_tile(self, tile_x, tile_y):
         if self.valid_tile([tile_x, tile_y]):
             if self.tiles[tile_x][tile_y] is None:
-                self.tiles[tile_x][tile_y] = Tile(tile_x * self.tileWidth, tile_y * self.tileHeight,
-                                                [0, 0, self.tileWidth, self.tileHeight], self.state, self.tileSet,
+                self.tiles[tile_x][tile_y] = Tile(tile_x * self.tile_width, tile_y * self.tile_height,
+                                                [0, 0, self.tile_width, self.tile_height], self.state, self.tileSet,
                                                 self.imageRegion, self.batch, self.group)
 
     def auto_tile(self):
