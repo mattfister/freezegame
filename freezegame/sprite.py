@@ -31,7 +31,7 @@ class Sprite:
         self.boundingBox = box
         self.box = copy.copy(box)
 
-        # used for rabbyt rdc (32 cause our x and y aren't centered like rabbyt expects)
+        # used for our broad phase collision
         self.bounding_radius = 32
 
         self.vx = 0
@@ -292,7 +292,7 @@ class Sprite:
     def resolve_sprite_collision(self, other_sprite, dimension):
         physical = False
         collided = False
-        if self.physical_to_sprites and other_sprite.physicalToSprites:
+        if self.physical_to_sprites and other_sprite.physical_to_sprites:
             physical = True
 
         if self == other_sprite:
@@ -353,7 +353,7 @@ class Sprite:
         if collided:
             if self.sensor_for_sprites:
                 self.collision_callback(other_sprite)
-            if other_sprite.sensorForSprites:
+            if other_sprite.sensor_for_sprites:
                 other_sprite.collision_callback(self)
 
     def toggle(self):

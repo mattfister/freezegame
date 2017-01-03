@@ -8,11 +8,12 @@ from freezegame.image_loader import ImageLoader
 from freezegame.abstract_state import AbstractState
 from freezegame.sprite import Sprite
 from freezegame.tile_map import TileMap
+from freezegame.broad_phase_collision import RDC
 
 pyglet.resource.path = ["./sample_graphics"]
 pyglet.resource.reindex()
 
-freezegame.resources.images = ImageLoader()
+freezegame.resources.images = ImageLoader("sample_graphics")
 
 platform = pyglet.window.get_platform()
 
@@ -175,18 +176,24 @@ class SampleScene(AbstractState):
             if sprite.updatable:
                 sprite.resolve_tile_map_collisions(self.map)
 
-        # TODO figure out broad phase collision again
+        # Broad phase collision
+        rdc = RDC()
+        rdc.recursive_clustering(self.sprites, 0, 1)
+        groups = rdc.colliding_groups
 
         # Now do narrow phase collision
-        for sprite in self.sprites:
-            for other_sprite in self.sprites:
-                if sprite is not other_sprite:
-                    sprite.resolve_sprite_collision(other_sprite, 'y')
+        for group in groups:
+            for sprite in group:
+                for other_sprite in self.sprites:
+                    if sprite is not other_sprite:
+                        sprite.resolve_sprite_collision(other_sprite, 'y')
 
-        for sprite in self.sprites:
-            for other_sprite in self.sprites:
-                if sprite is not other_sprite:
-                    sprite.resolve_sprite_collision(other_sprite, 'y')
+        # Now do narrow phase collision
+        for group in groups:
+            for sprite in group:
+                for other_sprite in self.sprites:
+                    if sprite is not other_sprite:
+                                sprite.resolve_sprite_collision(other_sprite, 'x')
 
         # Double check that no one resolved into a wall
         for sprite in self.sprites:

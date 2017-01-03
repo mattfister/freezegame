@@ -10,8 +10,8 @@ def texture_set_mag_filter_nearest(texture):
 
 
 class ImageLoader(object):
-    def __init__(self):
-        for file in os.listdir('./sample_graphics'):
+    def __init__(self, path):
+        for file in os.listdir('./' + path):
             name = file.split('.')[0]
             image = pyglet.resource.image(file)
             texture_set_mag_filter_nearest(image.get_texture())
