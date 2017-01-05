@@ -289,6 +289,10 @@ class Sprite:
     def finish_resolution_y(self):
         self.y = self.desired_position[1]
 
+    def resolve_collision_physical(self, other_sprite):
+        rv = [other_sprite.vx - self.vx, other_sprite.vy - self.vy]
+
+
     def desired_position_sprite_collision(self, other_sprite, dimension):
         physical = False
         collided = False
@@ -305,12 +309,14 @@ class Sprite:
 
         retval = 0.0
         if collision_rect.collides(other_sprite.get_current_rect()):
+            print('collision')
             collided = True
             intersection = collision_rect.get_intersect(other_sprite.get_current_rect())
+            print('intersection')
+            print(intersection)
             other_rect = other_sprite.get_current_rect()
             del_x = self.desired_position[0] - self.x
             del_y = self.desired_position[1] - self.y
-
 
             if dimension == 'x':
                 if del_x < 0:
@@ -322,7 +328,7 @@ class Sprite:
                             other_sprite.x = self.desired_position[0] + intersection.width
                         self.collide_left = True
                         other_sprite.collide_right = True
-                elif del_x > 0:
+                elif del_x >= 0:
                     if physical:
                         if not self.fixed:
                             retval = -intersection.width
@@ -339,7 +345,7 @@ class Sprite:
                             self.vy = 0
                         self.on_ground = True
                         other_sprite.collide_top = True
-                elif del_y > 0:
+                elif del_y >= 0:
                     if physical:
                         if not self.fixed:
                             retval = -intersection.height
