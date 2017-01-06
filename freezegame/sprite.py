@@ -80,6 +80,18 @@ class Sprite:
         self.mass = 1.0
         self.elasticity = 1.0
 
+    def get_left(self):
+        return self.x + self.box[0]
+
+    def get_last_left(self):
+        return self.last_x + self.box[0]
+
+    def get_right(self):
+        return self.x + self.box[0] + self.box[2]
+
+    def get_last_right(self):
+        return self.last_x + self.box[0] + self.box[2]
+
     def add_animation(self, name, frames, loops=True, fps=30.0):
         self.animations[name] = Animation(self, name, frames, loops, fps)
 
@@ -324,20 +336,20 @@ class Sprite:
     def separate_x(self, other_sprite):
         overlap = 0
         obj1_delta = self.x - self.last_x
-        obj2_delta = self.x - self.last_x
+        obj2_delta = other_sprite.x - other_sprite.last_x
 
         if obj1_delta != obj2_delta:
             obj1_delta_abs = math.fabs(obj1_delta)
             obj2_delta_abs = math.fabs(obj2_delta)
 
-            obj1_rect = Rect(self.x + self.box[0] - (obj1_delta if obj1_delta > 0 else 0), self.last_y + self.box[1], self.box[2] + (obj1_delta if obj1_delta > 0 else -obj1_delta), self.box[3])
-            obj2_rect = Rect(other_sprite.x + other_sprite.box[0] - (obj2_delta if obj2_delta > 0 else 0), other_sprite.last_y + other_sprite.box[1], other_sprite.box[2] + (obj2_delta if obj2_delta > 0 else -obj2_delta), other_sprite.box[3])
+            obj1_rect = Rect(self.get_left() - (obj1_delta if obj1_delta > 0 else 0), self.last_y + self.box[1], self.box[2] + (obj1_delta if obj1_delta > 0 else -obj1_delta), self.box[3])
+            obj2_rect = Rect(other_sprite.get_left() - (obj2_delta if obj2_delta > 0 else 0), other_sprite.last_y + other_sprite.box[1], other_sprite.box[2] + (obj2_delta if obj2_delta > 0 else -obj2_delta), other_sprite.box[3])
 
             if (obj1_rect.x + obj1_rect.width > obj2_rect.x) and (obj1_rect.x < obj2_rect.x + obj2_rect.width) and (obj1_rect.y + obj1_rect.height > obj2_rect.y) and (obj1_rect.y < obj2_rect.y + obj2_rect.height):
                 max_overlap = obj1_delta_abs + obj2_delta_abs + OVERLAP_BIAS
 
                 if obj1_delta > obj2_delta:
-                    overlap = self.x + self.box[1] - other_sprite.box[0] - other_sprite.x - other_sprite.box[0]
+                    overlap = self.x + self.box[0] + self.box[2] - other_sprite.x - other_sprite.box[0]
                     if overlap > max_overlap:
                         overlap = 0
                     else:
@@ -357,17 +369,17 @@ class Sprite:
             obj2_v = other_sprite.vx
 
             overlap *= 0.5
-            self.x = self.x - overlap
+            self.x -= overlap
             other_sprite.x += overlap
 
-            obj1_velocity = math.sqrt((obj2_v * obj2v * other_sprite.mass)/self.mass) * (1 if obj2_v > 0 else -1)
-            obj2_velocity = math.sqrt((obj1_v * obj1v * self.mass)/other_sprite.mass) * (1 if obj1_v > 0 else -1)
+            obj1_velocity = math.sqrt((obj2_v * obj2_v * other_sprite.mass)/self.mass) * (1 if obj2_v > 0 else -1)
+            obj2_velocity = math.sqrt((obj1_v * obj1_v * self.mass)/other_sprite.mass) * (1 if obj1_v > 0 else -1)
 
             average = (obj1_velocity + obj2_velocity) * 0.5
             obj1_velocity -= average
             obj2_velocity -= average
 
-            self.vx = average + obj1_velocity * self.elastcity
+            self.vx = average + obj1_velocity * self.elasticity
             other_sprite.vx = average + obj2_velocity * self.elasticity
 
             return True
