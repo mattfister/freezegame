@@ -64,7 +64,8 @@ class Sprite:
         self.dead = False
         self.collected = False
 
-        self.desired_position = [self.x, self.y]
+        self.last_x = self.x
+        self.last_y = self.y
 
         self.animations = {}
         self.cur_animation = None
@@ -101,16 +102,16 @@ class Sprite:
         return box
 
     def get_collision_rect(self):
-        box = Rect(self.box[0] + self.desired_position[0], self.box[1] + self.desired_position[1], self.box[2],
+        box = Rect(self.box[0] + self.x, self.box[1] + self.y, self.box[2],
                    self.box[3])
         return box
 
     def get_collision_rect_x(self):
-        box = Rect(self.box[0] + self.desired_position[0], self.box[1] + self.y, self.box[2], self.box[3])
+        box = Rect(self.box[0] + self.x, self.box[1] + self.y, self.box[2], self.box[3])
         return box
 
     def get_collision_rect_y(self):
-        box = Rect(self.box[0] + self.x, self.box[1] + self.desired_position[1], self.box[2], self.box[3])
+        box = Rect(self.box[0] + self.x, self.box[1] + self.y, self.box[2], self.box[3])
         return box
 
     def set_x(self, x):
@@ -203,6 +204,9 @@ class Sprite:
         pass
 
     def update(self, dt, keys, state):
+        self.last_x = copy.copy(self.x)
+        self.last_y = copy.copy(self.y)
+
         gravity_step = 0.0;
 
         if self.frictional:
@@ -219,7 +223,8 @@ class Sprite:
 
         self.vy += gravity_step
 
-        self.desired_position = [new_x, new_y]
+        self.x = new_x
+        self.y = new_y
 
         self.update_animations(dt, keys, state)
 
@@ -279,83 +284,6 @@ class Sprite:
     def distance(self, sprite):
         return math.sqrt((self.x - sprite.x) * (self.x - sprite.x) + (self.y - sprite.y) * (self.y - sprite.y))
 
-    def finish_resolution(self):
-        self.x = self.desired_position[0]
-        self.y = self.desired_position[1]
-
-    def finish_resolution_x(self):
-        self.x = self.desired_position[0]
-
-    def finish_resolution_y(self):
-        self.y = self.desired_position[1]
-
-    def desired_position_sprite_collision(self, other_sprite, dimension):
-        physical = False
-        collided = False
-        if self.physical_to_sprites and other_sprite.physical_to_sprites:
-            physical = True
-
-        if self == other_sprite:
-            return
-        # if self.get_collision_rect().collides(other_sprite.get_collision_rect()):
-        if dimension == 'x':
-            collision_rect = self.get_collision_rect_x()
-        else:
-            collision_rect = self.get_collision_rect_y()
-
-        retval = 0.0
-        if collision_rect.collides(other_sprite.get_current_rect()):
-            collided = True
-            intersection = collision_rect.get_intersect(other_sprite.get_current_rect())
-            other_rect = other_sprite.get_current_rect()
-            del_x = self.desired_position[0] - self.x
-            del_y = self.desired_position[1] - self.y
-
-
-            if dimension == 'x':
-                if del_x < 0:
-                    if physical:
-                        if not self.fixed:
-                            retval = intersection.width
-                            self.vx = 0
-                        else:
-                            other_sprite.x = self.desired_position[0] + intersection.width
-                        self.collide_left = True
-                        other_sprite.collide_right = True
-                elif del_x > 0:
-                    if physical:
-                        if not self.fixed:
-                            retval = -intersection.width
-                            self.vx = 0
-                        else:
-                            other_sprite.x = other_sprite.x - intersection.width
-                        self.collide_right = True
-                        other_sprite.collide_right = True
-            else:
-                if del_y < 0:
-                    if physical:
-                        if not self.fixed:
-                            retval = intersection.height
-                            self.vy = 0
-                        self.on_ground = True
-                        other_sprite.collide_top = True
-                elif del_y > 0:
-                    if physical:
-                        if not self.fixed:
-                            retval = -intersection.height
-                            self.vy = 0
-                        else:
-                            other_sprite.y = other_sprite.y + intersection.height
-                        self.collide_top = True
-                        other_sprite.collide_ground = True
-
-        if collided:
-            if self.sensor_for_sprites:
-                self.collision_callback(other_sprite)
-            if other_sprite.sensor_for_sprites:
-                other_sprite.collision_callback(self)
-
-        return retval
 
     def toggle(self):
         pass
@@ -385,7 +313,7 @@ class Sprite:
                 return False
 
     def resolve_tile_map_collisions(self, tile_map):
-        tiles = tile_map.get_surrounding_tiles_by_pos([self.x + self.box[0], self.y + self.box[1]])
+        tiles = tile_map.get_surrounding_tiles_by_pos([self.last_x + self.box[0], self.last_y + self.box[1]])
         for i, tile in enumerate(tiles):
             if tile is not None:
                 if self.get_collision_rect().collides(tile.get_collision_rect()):
@@ -396,23 +324,23 @@ class Sprite:
                     if self.physical_to_walls and tile.physical_to_sprites:
                         intersection = self.get_collision_rect().get_intersect(tile.get_collision_rect())
                         if i == 0:  # Tile is directly below
-                            self.desired_position = [self.desired_position[0],
-                                                     self.desired_position[1] + intersection.height]
+                            self.x = self.x
+                            self.y = self.y + intersection.height
                             self.vy = 0
                             self.on_ground = True
                         elif i == 1:  # Tile is directly above
-                            self.desired_position = [self.desired_position[0],
-                                                     self.desired_position[1] - intersection.height]
+                            self.x = self.x
+                            self.y = self.y - intersection.height
                             self.collide_top = True
                             self.vy = 0
                         elif i == 2:  # Tile is left
-                            self.desired_position = [self.desired_position[0] + intersection.width,
-                                                     self.desired_position[1]]
+                            self.x = self.x + intersection.width
+                            self.y = self.y
                             self.vx = 0
                             self.collide_left = True
                         elif i == 3:  # Tile is right
-                            self.desired_position = [self.desired_position[0] - intersection.width,
-                                                     self.desired_position[1]]
+                            self.x = self.x - intersection.width
+                            self.y = self.y
                             self.vx = 0
                             self.collide_right = True
                         else:
@@ -425,8 +353,8 @@ class Sprite:
                                     intersection_height = -intersection.height
                                     self.collide_top = True
                                 self.vy = 0
-                                self.desired_position = [self.desired_position[0],
-                                                         self.desired_position[1] + intersection_height]
+                                self.x = self.x
+                                self.y = self.y + intersection_height
                             else:
                                 intersection_width = 0
                                 if (i == 6 or i == 4):
@@ -436,5 +364,5 @@ class Sprite:
                                     intersection_width = -intersection.width
                                     self.collide_right = True
                                 self.vx = 0
-                                self.desired_position = [self.desired_position[0] + intersection_width,
-                                                         self.desired_position[1]]
+                                self.x = self.x + intersection_width
+                                self.y = self.y

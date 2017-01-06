@@ -187,17 +187,11 @@ class SampleScene(AbstractState):
             for sprite in group:
                 for other_sprite in self.sprites:
                     if sprite is not other_sprite:
-                        resolution_vector = [sprite.desired_position_sprite_collision(other_sprite, 'x'),
-                                             sprite.desired_position_sprite_collision(other_sprite, 'y')]
-                        if math.fabs(resolution_vector[0]) < math.fabs(resolution_vector[1]):
-                            sprite.desired_position[0] = sprite.desired_position[0] + resolution_vector[0]
-                        else:
-                            sprite.desired_position[1] = sprite.desired_position[1] + resolution_vector[1]
+                        pass
 
         # Double check that no one resolved into a wall
         for sprite in self.sprites:
             sprite.resolve_tile_map_collisions(self.map)
-            sprite.finish_resolution()
             sprite.update_sprite_pos()
 
 
