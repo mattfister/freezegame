@@ -18,6 +18,7 @@ class Sprite:
         self.collide_left = False
         self.collide_right = False
         self.collide_top = False
+        self.collide_bottom = False
         self.deadly_to_player = False
         self.deadly_to_enemies = False
         self.tileable = True
@@ -91,6 +92,18 @@ class Sprite:
 
     def get_last_right(self):
         return self.last_x + self.box[0] + self.box[2]
+
+    def get_bottom(self):
+        return self.y + self.box[1]
+
+    def get_last_bottom(self):
+        return self.last_y + self.box[1]
+
+    def get_top(self):
+        return self.y + self.box[1] + self.box[3]
+
+    def get_last_top(self):
+        return self.last_y + self.box[1] + self.box[3]
 
     def add_animation(self, name, frames, loops=True, fps=30.0):
         self.animations[name] = Animation(self, name, frames, loops, fps)
@@ -329,9 +342,9 @@ class Sprite:
 
     def separate(self, other_sprite):
         separated_x = self.separate_x(other_sprite)
-        #separated_y = separate_y(other_sprite)
+        separated_y = self.separate_y(other_sprite)
 
-        return separated_x #or separated_y
+        return separated_x or separated_y
 
     def separate_x(self, other_sprite):
         overlap = 0
@@ -386,6 +399,56 @@ class Sprite:
         else:
             return False
 
+    def separate_y(self, other_sprite):
+        overlap = 0
+        obj1_delta = self.y - self.last_y
+        obj2_delta = other_sprite.y - other_sprite .last_y
+
+        if obj1_delta != obj2_delta:
+            obj1_delta_abs = math.fabs(obj1_delta)
+            obj2_delta_abs = math.fabs(obj2_delta)
+
+            obj1_rect = Rect(self.x, self.get_bottom() - (obj1_delta if obj1_delta > 0 else 0), self.box[2], self.box[3] + obj1_delta_abs)
+            obj2_rect = Rect(other_sprite.x, other_sprite.get_bottom() - (obj2_delta if obj2_delta > 0 else 0), other_sprite.box[2], other_sprite.box[3] + obj2_delta_abs)
+
+            if (obj1_rect.x + obj1_rect.width > obj2_rect.x) and (obj1_rect.x < obj2_rect.x + obj2_rect.width) and (obj1_rect.y + obj1_rect.height > obj2_rect.y) and (obj1_rect.y < obj2_rect.y + obj2_rect.height):
+                max_overlap = obj1_delta_abs + obj2_delta_abs + OVERLAP_BIAS
+
+                if obj1_delta > obj2_delta:
+                    overlap = self.get_bottom() + self.box[3] - other_sprite.get_bottom()
+                    if overlap > max_overlap:
+                        overlap = 0
+                    else:
+                        self.collide_bottom = True
+                        other_sprite.collide_top = True
+                elif obj1_delta < obj2_delta:
+                    overlap = self.get_bottom() - other_sprite.box[3] - other_sprite.get_bottom()
+
+                    if -overlap > max_overlap:
+                        overlap = 0
+                    else:
+                        self.collide_top = True
+                        other_sprite.collide_bottom = True
+
+        if overlap != 0:
+            obj1_v = self.vy
+            obj2_v = other_sprite.vy
+
+            overlap *= 0.5
+            self.y -= overlap
+            other_sprite.y += overlap
+            obj1_velocity = math.sqrt((obj2_v * obj2_v * other_sprite.mass)/self.mass) * (1 if obj2_v > 0 else -1)
+            obj2_velocity = math.sqrt((obj1_v * obj1_v * self.mass)/self.mass) * (1 if obj1_v > 0 else -1)
+            average = (obj1_velocity + obj2_velocity) * 0.5
+            obj1_velocity -= average
+            obj2_velocity -= average
+
+            self.vy = average + obj1_velocity * self.elasticity
+            other_sprite.vy = average + obj2_velocity * self.elasticity
+
+            return True
+        else:
+            return False
 
     def resolve_tile_map_collisions(self, tile_map):
         tiles = tile_map.get_surrounding_tiles_by_pos([self.last_x + self.box[0], self.last_y + self.box[1]])
