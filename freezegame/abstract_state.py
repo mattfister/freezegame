@@ -4,7 +4,7 @@ class AbstractState:
         self.gravity = -600.0
         self.max_v_y_plus = 1000
         self.max_v_y_minus = -400
-        self.max_v_x = 100
+        self.max_v_x = 1000
         self.friction = 2.1
         
     def update(self, dt, keys):
