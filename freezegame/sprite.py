@@ -7,6 +7,7 @@ from freezegame import resources
 from freezegame.animation import Animation
 from freezegame.rect import Rect
 
+OVERLAP_BIAS = 4
 
 class Sprite:
     def __init__(self, x, y, box, state, image_name=None, image_region=None, batch=None, group=None):
@@ -75,6 +76,9 @@ class Sprite:
         self.max_v_y_minus = self.state.max_v_y_minus
 
         self.vision_cone_r = 32 * 20.0
+
+        self.mass = 1.0
+        self.elasticity = 1.0
 
     def add_animation(self, name, frames, loops=True, fps=30.0):
         self.animations[name] = Animation(self, name, frames, loops, fps)
@@ -310,6 +314,66 @@ class Sprite:
                 return True
             else:
                 return False
+
+    def separate(self, other_sprite):
+        separated_x = self.separate_x(other_sprite)
+        #separated_y = separate_y(other_sprite)
+
+        return separated_x #or separated_y
+
+    def separate_x(self, other_sprite):
+        overlap = 0
+        obj1_delta = self.x - self.last_x
+        obj2_delta = self.x - self.last_x
+
+        if obj1_delta != obj2_delta:
+            obj1_delta_abs = math.fabs(obj1_delta)
+            obj2_delta_abs = math.fabs(obj2_delta)
+
+            obj1_rect = Rect(self.x + self.box[0] - (obj1_delta if obj1_delta > 0 else 0), self.last_y + self.box[1], self.box[2] + (obj1_delta if obj1_delta > 0 else -obj1_delta), self.box[3])
+            obj2_rect = Rect(other_sprite.x + other_sprite.box[0] - (obj2_delta if obj2_delta > 0 else 0), other_sprite.last_y + other_sprite.box[1], other_sprite.box[2] + (obj2_delta if obj2_delta > 0 else -obj2_delta), other_sprite.box[3])
+
+            if (obj1_rect.x + obj1_rect.width > obj2_rect.x) and (obj1_rect.x < obj2_rect.x + obj2_rect.width) and (obj1_rect.y + obj1_rect.height > obj2_rect.y) and (obj1_rect.y < obj2_rect.y + obj2_rect.height):
+                max_overlap = obj1_delta_abs + obj2_delta_abs + OVERLAP_BIAS
+
+                if obj1_delta > obj2_delta:
+                    overlap = self.x + self.box[1] - other_sprite.box[0] - other_sprite.x - other_sprite.box[0]
+                    if overlap > max_overlap:
+                        overlap = 0
+                    else:
+                        self.collide_right = True
+                        other_sprite.collide_left = True
+                elif obj1_delta < obj2_delta:
+                    overlap = self.x + self.box[0] - other_sprite.box[2] - other_sprite.x - other_sprite.box[0]
+
+                    if -overlap > max_overlap:
+                        overlap = 0
+                    else:
+                        self.collide_left = True
+                        other_sprite.collide_right = True
+
+        if overlap != 0:
+            obj1_v = self.vx
+            obj2_v = other_sprite.vx
+
+            overlap *= 0.5
+            self.x = self.x - overlap
+            other_sprite.x += overlap
+
+            obj1_velocity = math.sqrt((obj2_v * obj2v * other_sprite.mass)/self.mass) * (1 if obj2_v > 0 else -1)
+            obj2_velocity = math.sqrt((obj1_v * obj1v * self.mass)/other_sprite.mass) * (1 if obj1_v > 0 else -1)
+
+            average = (obj1_velocity + obj2_velocity) * 0.5
+            obj1_velocity -= average
+            obj2_velocity -= average
+
+            self.vx = average + obj1_velocity * self.elastcity
+            other_sprite.vx = average + obj2_velocity * self.elasticity
+
+            return True
+        else:
+            return False
+
 
     def resolve_tile_map_collisions(self, tile_map):
         tiles = tile_map.get_surrounding_tiles_by_pos([self.last_x + self.box[0], self.last_y + self.box[1]])
