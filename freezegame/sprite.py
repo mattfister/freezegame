@@ -284,7 +284,6 @@ class Sprite:
     def distance(self, sprite):
         return math.sqrt((self.x - sprite.x) * (self.x - sprite.x) + (self.y - sprite.y) * (self.y - sprite.y))
 
-
     def toggle(self):
         pass
 
