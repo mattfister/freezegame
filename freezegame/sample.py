@@ -1,3 +1,4 @@
+import itertools
 import pyglet
 from pyglet.gl import *
 
@@ -182,12 +183,11 @@ class SampleScene(AbstractState):
         rdc.recursive_clustering(self.sprites, 0, 1)
         groups = rdc.colliding_groups
 
-        # Now do narrow phase collision and resolution
+        #Now do narrow phase collision and resolution
         for group in groups:
-            for sprite in group:
-                for other_sprite in self.sprites:
-                    if sprite is not other_sprite:
-                        pass
+            pairs = list(itertools.combinations(group, 2))
+            for pair in pairs:
+                pair[0].separate(pair[1])
 
         # Double check that no one resolved into a wall
         for sprite in self.sprites:
