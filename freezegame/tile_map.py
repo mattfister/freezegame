@@ -32,7 +32,6 @@ class TileMap:
                 if i == 0 or i == self.width - 1 or j == 0 or j == self.height - 1:
                     new_tile = Tile(i * self.tile_width, j * self.tile_height, [0, 0, self.tile_width, self.tile_height],
                                     self.state, self.tileSet, self.imageRegion, self.batch, self.group)
-                    new_tile.invincible = True
                     self.tiles[i][j] = new_tile
 
     def fill(self):
