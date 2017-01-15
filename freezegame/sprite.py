@@ -87,6 +87,13 @@ class Sprite:
         self.mass = 1.0
         self.elasticity = 1.0
 
+        self.flash_timer = 0.0
+        self.flash_timeout = 0.1
+        self.flash_duration = 0.0
+        self.flash_on = False
+        self.flashing = False
+
+
     def get_left(self):
         return self.x + self.box[0]
 
@@ -274,6 +281,25 @@ class Sprite:
 
         if self.cur_animation is not None:
             self.cur_animation.update(dt, keys)
+
+        if self.flashing:
+            self.flash_timer -= dt
+            self.flash_duration -= dt
+            if self.flash_timer <= 0.0 and self.flash_on:
+                self.set_color([50, 50, 50])
+                self.flash_on = False
+                self.flash_timer = self.flash_timeout
+            elif self.flash_timer <= 0.0 and not self.flash_on:
+                self.set_color([255, 255, 255])
+                self.flash_on = True
+                self.flash_timer = 0.0
+            if self.flash_duration <= 0.0:
+                self.flashing = False
+                self.set_color([255, 255, 255])
+
+    def flash(self, time):
+        self.flash_duration = time
+        self.flashing = True
 
     def update_animations(self, dt, keys, state):
         if self.vx > 10:
