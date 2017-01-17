@@ -31,6 +31,7 @@ class Sprite:
         self.damages_player = False
         self.is_player = False
         self.is_enemy = False
+        self.is_door = False
         self.damage = 0
         self.hp = 0
 
@@ -440,6 +441,7 @@ class Sprite:
             else:
                 if self.sensor_for_sprites:
                     self.collision_callback(other_sprite)
+                    other_sprite.collision_callback(self)
                 elif other_sprite.sensor_for_sprites:
                     other_sprite.collision_callback(self)
 
@@ -504,6 +506,7 @@ class Sprite:
             else:
                 if self.sensor_for_sprites:
                     self.collision_callback(other_sprite)
+                    other_sprite.collision_callback(self)
                 elif other_sprite.sensor_for_sprites:
                     other_sprite.collision_callback(self)
             return True
