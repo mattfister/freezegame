@@ -31,6 +31,7 @@ class Sprite:
         self.damages_player = False
         self.is_player = False
         self.is_enemy = False
+        self.is_missile = False
         self.is_door = False
         self.damage = 0
         self.hp = 0
